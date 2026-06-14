@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeNotes</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:white;
+    color:black;
+    padding:20px;
+}
+
+.dark{
+    background:#121212;
+    color:white;
+}
+
+.container{
+    max-width:500px;
+    margin:auto;
+}
+
+input, textarea{
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+    box-sizing:border-box;
+}
+
+button{
+    padding:10px;
+    margin:5px 0;
+    cursor:pointer;
+}
+
+li{
+    margin:10px 0;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    list-style:none;
+}
+
+.dark li{
+    border-color:#555;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div id="lockScreen">
+    <h1>🔒 SafeNotes</h1>
+
+    <input type="password" id="pinInput" placeholder="Enter PIN">
+
+    <button onclick="unlock()">Unlock</button>
+
+    <p id="message"></p>
+</div>
+
+<div id="notesScreen" style="display:none;">
+
+    <h1>📝 SafeNotes</h1>
+
+    <button onclick="toggleTheme()">🌙 Dark / ☀️ Light</button>
+
+    <textarea id="noteInput"
+        rows="5"
+        placeholder="Write your note here..."></textarea>
+
+    <button onclick="saveNote()">💾 Save Note</button>
+
+    <h3>Saved Notes</h3>
+
+    <ul id="notesList"></ul>
+
+</div>
+
+</div>
+
+<script>
+
+const APP_PIN = "1234";
+
+function unlock() {
+
+    let pin = document.getElementById("pinInput").value;
+
+    if(pin === APP_PIN){
+
+        document.getElementById("lockScreen").style.display = "none";
+
+        document.getElementById("notesScreen").style.display = "block";
+
+        loadNotes();
+
+        loadTheme();
+
+    } else {
+
+        document.getElementById("message").innerHTML =
+            "❌ Wrong PIN";
+    }
+}
+
+function saveNote(){
+
+    let note =
+        document.getElementById("noteInput").value;
+
+    if(note.trim() === "") return;
+
+    let notes =
+        JSON.parse(localStorage.getItem("notes")) || [];
+
+    notes.push(note);
+
+    localStorage.setItem(
+        "notes",
+        JSON.stringify(notes)
+    );
+
+    document.getElementById("noteInput").value = "";
+
+    loadNotes();
+}
+
+function deleteNote(index){
+
+    let notes =
+        JSON.parse(localStorage.getItem("notes")) || [];
+
+    notes.splice(index,1);
+
+    localStorage.setItem(
+        "notes",
+        JSON.stringify(notes)
+    );
+
+    loadNotes();
+}
+
+function loadNotes(){
+
+    let notes =
+        JSON.parse(localStorage.getItem("notes")) || [];
+
+    let list =
+        document.getElementById("notesList");
+
+    list.innerHTML = "";
+
+    notes.forEach((note,index)=>{
+
+        let li = document.createElement("li");
+
+        li.innerHTML =
+            note +
+            '<br><button onclick="deleteNote(' +
+            index +
+            ')">🗑 Delete</button>';
+
+        list.appendChild(li);
+
+    });
+}
+
+function toggleTheme(){
+
+    if(document.body.classList.contains("dark")){
+
+        document.body.classList.remove("dark");
+
+        localStorage.setItem(
+            "theme",
+            "light"
+        );
+
+    }else{
+
+        document.body.classList.add("dark");
+
+        localStorage.setItem(
+            "theme",
+            "dark"
+        );
+    }
+}
+
+function loadTheme(){
+
+    let theme =
+        localStorage.getItem("theme");
+
+    if(theme === "dark"){
+
+        document.body.classList.add("dark");
+    }
+}
+
+</script>
+
+</body>
+</html>
